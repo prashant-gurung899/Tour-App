@@ -103,6 +103,22 @@ app.patch('/api/v1/tours/:id', (req, res) => {
   });
 });
 
+//DELETE LOGIC
+app.delete('/api/v1/tours/:id', (req, res) => {
+  //for request errors
+  if (req.params.id * 1 > tours.length) {
+    return res.status(404).json({
+      status: 'FAILURE',
+      message: 'INVALID ID',
+    });
+  }
+
+  res.status(204).json({
+    status: 'success',
+    data: null,
+  });
+});
+
 //SERVER LOGIC
 app.listen(port, () => {
   console.log(`listening on port: ${port}...`);
