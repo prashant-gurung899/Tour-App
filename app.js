@@ -1,30 +1,46 @@
 const fs = require('fs');
 const express = require('express');
+const morgan = require('morgan');
 
 const app = express();
+
+//MIDDLEWARES
+app.use(morgan('dev'));
 app.use(express.json()); //middleware-function that modifies the incoming request data.
 
-const port = 3000;
+//global middleware
+app.use((req, res, next) => {
+  console.log('HELLO FROM THE MIDDLEWARE');
+  next();
+});
+app.use((req, res, next) => {
+  req.requestTime = new Date().toDateString();
+  next();
+});
 
+//FILE READ
 const tours = JSON.parse(
   fs.readFileSync(`${__dirname}/dev-data/data/tours-simple.json`)
 );
 
+//ROUTE HANDLERS
+//for tours
 //GET method logic
-app.get('/api/v1/tours', (req, res) => {
+const getAllTours = (req, res) => {
+  console.log(req.requestTime);
   res.status(200).json({
     //jsend json formatting standard
     status: 'Success',
+    requestedAt: req.requestTime,
     //for multiple objects
     results: tours.length,
     data: {
       tours: tours,
     },
   });
-});
-
-//GET method logic for id
-app.get('/api/v1/tours/:id', (req, res) => {
+};
+//get tour by id
+const getOneTour = (req, res) => {
   //variables in the url are called params
   // console.log(req.params);
 
@@ -55,10 +71,10 @@ app.get('/api/v1/tours/:id', (req, res) => {
       tour,
     },
   });
-});
+};
 
-//POST method logic
-app.post('/api/v1/tours', (req, res) => {
+//post method logic
+const createTour = (req, res) => {
   // console.log(req.body);
   //new id assignment
   const newId = tours[tours.length - 1].id + 1;
@@ -83,10 +99,10 @@ app.post('/api/v1/tours', (req, res) => {
     }
   );
   // res.send('DONE'); cant send res twice
-});
+};
 
-//UPDATE METHOD LOGIC
-app.patch('/api/v1/tours/:id', (req, res) => {
+//patch method logic
+const updateTour = (req, res) => {
   //for request errors
   if (req.params.id * 1 > tours.length) {
     return res.status(404).json({
@@ -101,10 +117,10 @@ app.patch('/api/v1/tours/:id', (req, res) => {
       tour: '<updated tour here.....>',
     },
   });
-});
+};
 
-//DELETE LOGIC
-app.delete('/api/v1/tours/:id', (req, res) => {
+//delete method logic
+const deleteTour = (req, res) => {
   //for request errors
   if (req.params.id * 1 > tours.length) {
     return res.status(404).json({
@@ -112,14 +128,69 @@ app.delete('/api/v1/tours/:id', (req, res) => {
       message: 'INVALID ID',
     });
   }
-
   res.status(204).json({
     status: 'success',
     data: null,
   });
-});
+};
+
+//for users
+const getAllUsers = (req, res) => {
+  res.status(500).json({
+    status: 'ERROR',
+    message: 'This route is not implemented yet',
+  });
+};
+const getOneUser = (req, res) => {
+  res.status(500).json({
+    status: 'ERROR',
+    message: 'This route is not implemented yet',
+  });
+};
+const createUser = (req, res) => {
+  res.status(500).json({
+    status: 'ERROR',
+    message: 'This route is not implemented yet',
+  });
+};
+const updateUser = (req, res) => {
+  res.status(500).json({
+    status: 'ERROR',
+    message: 'This route is not implemented yet',
+  });
+};
+const deleteUser = (req, res) => {
+  res.status(500).json({
+    status: 'ERROR',
+    message: 'This route is not implemented yet',
+  });
+};
+
+// app.get('/api/v1/tours', getTours);
+// app.get('/api/v1/tours/:id', getOneTour);
+// app.post('/api/v1/tours', createTour);
+// app.patch('/api/v1/tours/:id', updateTour);
+// app.delete('/api/v1/tours/:id', deleteTour);
+
+//ROUTES
+//chaining all the route handlers rather than calling everyone each at a time
+app.route('/api/v1/tours').get(getAllTours).post(createTour);
+app
+  .route('/api/v1/tours/:id')
+  .get(getOneTour)
+  .patch(updateTour)
+  .delete(deleteTour);
+
+//user ROUTES
+app.route('/api/v1/users').get(getAllUsers).post(createUser);
+app
+  .route('/api/v1/users/:id')
+  .get(getOneUser)
+  .patch(updateUser)
+  .delete(deleteUser);
 
 //SERVER LOGIC
+const port = 3000;
 app.listen(port, () => {
   console.log(`listening on port: ${port}...`);
 });
