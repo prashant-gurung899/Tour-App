@@ -15,6 +15,17 @@ exports.checkID = (req, res, next, val) => {
   }
   next();
 };
+exports.checkBody = (req, res, next) => {
+  // const name = req.body.name;
+  //const price = req.body.price;
+  if (!req.body.name || !req.body.price) {
+    return res.status(400).json({
+      status: 'FAILURE',
+      message: 'MISSING NAME OR PRICE',
+    });
+  }
+  next();
+};
 //ROUTE HANDLERS
 //for tours
 //GET method logic
