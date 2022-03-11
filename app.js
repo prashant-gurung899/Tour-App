@@ -7,9 +7,14 @@ const userRouter = require('./routes/userRoutes');
 const app = express();
 
 //MIDDLEWARES
-app.use(morgan('dev'));
+console.log(process.env.NODE_ENV);
+if (process.env.NODE_ENV !== 'development') {
+  app.use(morgan('dev'));
+}
 app.use(express.json()); //middleware-function that modifies the incoming request data.
 
+//serve static files
+app.use(express.static(`${__dirname}/public`));
 //global middleware
 app.use((req, res, next) => {
   console.log('HELLO FROM THE MIDDLEWARE');
