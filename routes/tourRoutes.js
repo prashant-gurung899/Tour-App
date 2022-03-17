@@ -5,7 +5,7 @@ const tourController = require('./../controllers/tourController');
 const router = express.Router();
 
 //param middleware
-router.param('id', tourController.checkID);
+// router.param('id', tourController.checkID);
 
 //ROUTES
 //chaining all the route handlers rather than calling everyone each at a time

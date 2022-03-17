@@ -1,20 +1,5 @@
-const fs = require('fs');
-//FILE READ
-const tours = JSON.parse(
-  fs.readFileSync(`${__dirname}/../dev-data/data/tours-simple.json`)
-);
+const Tour = require('./../models/tourModel');
 
-exports.checkID = (req, res, next, val) => {
-  console.log(`The tour id is : ${val}`);
-  //for request errors
-  if (req.params.id * 1 > tours.length) {
-    return res.status(404).json({
-      status: 'FAILURE',
-      message: 'INVALID ID',
-    });
-  }
-  next();
-};
 exports.checkBody = (req, res, next) => {
   // const name = req.body.name;
   //const price = req.body.price;
@@ -35,65 +20,30 @@ exports.getAllTours = (req, res) => {
     //jsend json formatting standard
     status: 'Success',
     requestedAt: req.requestTime,
-    //for multiple objects
-    results: tours.length,
-    data: {
-      tours: tours,
-    },
+    // //for multiple objects
+    // results: tours.length,
+    // data: {
+    //   tours: tours,
+    // },
   });
 };
 //get tour by id
 exports.getOneTour = (req, res) => {
-  //variables in the url are called params
-  // console.log(req.params);
-
   //this is a trick to convert a string to a number in javascript
   const id = req.params.id * 1;
 
   //finding the tour through find function loop
-  const tour = tours.find((el) => el.id === id);
-
-  //for request errors example 2
-  // if (!tour) {
-  //   return res.status(404).json({
-  //     status: 'FAILURE',
-  //     message: 'INVALID ID',
-  //   });
-  // }
-  res.status(200).json({
-    status: 'Success',
-    data: {
-      tour,
-    },
-  });
+  //const tour = tours.find((el) => el.id === id);
 };
 
 //post method logic
 exports.createTour = (req, res) => {
-  // console.log(req.body);
-  //new id assignment
-  const newId = tours[tours.length - 1].id + 1;
-
-  //create new object by merging with existing objects = Object.assign()
-  const newTour = Object.assign({ id: newId }, req.body);
-
-  //push new object(tour) into tours-simple.JSON
-  tours.push(newTour);
-
-  //write into the file
-  fs.writeFile(
-    `${__dirname}/dev-data/data/tours-simple.json`,
-    JSON.stringify(tours),
-    (err) => {
-      res.status(201).json({
-        status: 'success',
-        data: {
-          tour: newTour,
-        },
-      });
-    }
-  );
-  // res.send('DONE'); cant send res twice
+  res.status(201).json({
+    status: 'success',
+    //  data: {
+    //    tour: newTour,
+    //  },
+  });
 };
 
 //patch method logic
