@@ -6,7 +6,7 @@ const Tour = require('./../models/tourModel');
 exports.getAllTours = async (req, res) => {
   try {
     //BUILD QUERY
-    //FILTERING-destructuring
+    //1A-FILTERING-destructuring
     const queryObj = { ...req.query }; //copy object
     const excludedFields = ['page', 'sort', 'limit', 'fields'];
     excludedFields.forEach((el) => delete queryObj[el]);
@@ -24,7 +24,7 @@ exports.getAllTours = async (req, res) => {
     //const tours = await Tour.find(req.query);
     // const tours = await Tour.find(queryObj);
 
-    //ADVANCED FILTERING
+    //1BADVANCED FILTERING
     let queryStr = JSON.stringify(queryObj);
     queryStr = queryStr.replace(/\b(gte|gt|lte|lt)\b/g, (match) => `$${match}`);
     //console.log(JSON.parse(queryStr));
@@ -32,13 +32,22 @@ exports.getAllTours = async (req, res) => {
     // const query = Tour.find(queryObj); //EASIER FOR CHAINING METHODS IN FUTURE
     let query = Tour.find(JSON.parse(queryStr)); //EASIER FOR CHAINING METHODS IN FUTURE
 
-    //SORTING
+    //2SORTING
     if (req.query.sort) {
       const sortBy = req.query.sort.split(',').join(' ');
       // console.log(sortBy);
       query = query.sort(sortBy);
     } else {
-      query = query.sort('-createdAt'); //default sort option
+      query = query.sort('-createdAt'); //default sort option-descending
+    }
+
+    //3- FIELD LIMITNG
+    if (req.query.fields) {
+      const fields = req.query.fields.split(',').join(' ');
+
+      query = query.select(fields);
+    } else {
+      query = query.select('-__v'); //default limitation-exclude
     }
 
     //EXECUTE QUERY
