@@ -5,7 +5,43 @@ const Tour = require('./../models/tourModel');
 //GET method logic
 exports.getAllTours = async (req, res) => {
   try {
-    const tours = await Tour.find();
+    //BUILD QUERY
+    //FILTERING-destructuring
+    const queryObj = { ...req.query }; //copy object
+    const excludedFields = ['page', 'sort', 'limit', 'fields'];
+    excludedFields.forEach((el) => delete queryObj[el]);
+
+    // console.log(req.query, queryObj);
+
+    //FILTERING-BY HARD CODING
+
+    // const tours = await Tour.find({
+    //   duration : 5,
+    //   difficulty:'easy'
+    // });
+
+    //NOT APPLICABLE TO CHAIN METHOD IN FUTURE
+    //const tours = await Tour.find(req.query);
+    // const tours = await Tour.find(queryObj);
+
+    //ADVANCED FILTERING
+    let queryStr = JSON.stringify(queryObj);
+    queryStr = queryStr.replace(/\b(gte|gt|lte|lt)\b/g, (match) => `$${match}`);
+    console.log(JSON.parse(queryStr));
+
+    // const query = Tour.find(queryObj); //EASIER FOR CHAINING METHODS IN FUTURE
+    const query = Tour.find(JSON.parse(queryStr)); //EASIER FOR CHAINING METHODS IN FUTURE
+
+    //EXECUTE QUERY
+    const tours = await query;
+
+    //FILTER USING mongoose METHODS-chaining
+    // const query = await Tour.find()
+    //   .where('duration')
+    //   .equals(5)
+    //   .where('difficulty')
+    //   .equals('easy');
+
     res.status(200).json({
       status: 'Success',
       //for multiple objects
