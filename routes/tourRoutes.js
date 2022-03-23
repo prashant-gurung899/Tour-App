@@ -10,6 +10,9 @@ const router = express.Router();
 //ROUTES
 //chaining all the route handlers rather than calling everyone each at a time
 router
+  .route('/top-5-cheap')
+  .get(tourController.aliasTopTours, tourController.getAllTours);
+router
   .route('/')
   .get(tourController.getAllTours)
   .post(tourController.createTour);
