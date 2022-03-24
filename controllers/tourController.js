@@ -1,4 +1,5 @@
 const Tour = require('./../models/tourModel');
+const APIFeatures = require('./../utils/apiFeatures');
 
 //ROUTE HANDLERS
 //for tours
@@ -9,66 +10,72 @@ exports.aliasTopTours = (req, res, next) => {
   req.query.fields = 'name,price,difficulty,summary,ratingsAverage';
   next();
 };
+
 exports.getAllTours = async (req, res) => {
   try {
-    //BUILD QUERY
-    //1A-FILTERING-destructuring
-    const queryObj = { ...req.query }; //copy object
-    const excludedFields = ['page', 'sort', 'limit', 'fields'];
-    excludedFields.forEach((el) => delete queryObj[el]);
+    // //BUILD QUERY
+    // //1A-FILTERING-destructuring
+    // const queryObj = { ...req.query }; //copy object
+    // const excludedFields = ['page', 'sort', 'limit', 'fields'];
+    // excludedFields.forEach((el) => delete queryObj[el]);
 
-    // console.log(req.query, queryObj);
+    // // console.log(req.query, queryObj);
 
-    //FILTERING-BY HARD CODING
+    // //FILTERING-BY HARD CODING
 
-    // const tours = await Tour.find({
-    //   duration : 5,
-    //   difficulty:'easy'
-    // });
+    // // const tours = await Tour.find({
+    // //   duration : 5,
+    // //   difficulty:'easy'
+    // // });
 
-    //NOT APPLICABLE TO CHAIN METHOD IN FUTURE
-    //const tours = await Tour.find(req.query);
-    // const tours = await Tour.find(queryObj);
+    // //NOT APPLICABLE TO CHAIN METHOD IN FUTURE
+    // //const tours = await Tour.find(req.query);
+    // // const tours = await Tour.find(queryObj);
 
-    //1BADVANCED FILTERING
-    let queryStr = JSON.stringify(queryObj);
-    queryStr = queryStr.replace(/\b(gte|gt|lte|lt)\b/g, (match) => `$${match}`);
-    //console.log(JSON.parse(queryStr));
+    // //1BADVANCED FILTERING
+    // let queryStr = JSON.stringify(queryObj);
+    // queryStr = queryStr.replace(/\b(gte|gt|lte|lt)\b/g, (match) => `$${match}`);
+    // //console.log(JSON.parse(queryStr));
 
-    // const query = Tour.find(queryObj); //EASIER FOR CHAINING METHODS IN FUTURE
-    let query = Tour.find(JSON.parse(queryStr)); //EASIER FOR CHAINING METHODS IN FUTURE
+    // // const query = Tour.find(queryObj); //EASIER FOR CHAINING METHODS IN FUTURE
+    // let query = Tour.find(JSON.parse(queryStr)); //EASIER FOR CHAINING METHODS IN FUTURE
 
-    //2SORTING
-    if (req.query.sort) {
-      const sortBy = req.query.sort.split(',').join(' ');
-      // console.log(sortBy);
-      query = query.sort(sortBy);
-    } else {
-      query = query.sort('-createdAt'); //default sort option-descending
-    }
+    // //2SORTING
+    // if (req.query.sort) {
+    //   const sortBy = req.query.sort.split(',').join(' ');
+    //   // console.log(sortBy);
+    //   query = query.sort(sortBy);
+    // } else {
+    //   query = query.sort('-createdAt'); //default sort option-descending
+    // }
 
-    //3- FIELD LIMITNG
-    if (req.query.fields) {
-      const fields = req.query.fields.split(',').join(' ');
+    // //3- FIELD LIMITNG
+    // if (req.query.fields) {
+    //   const fields = req.query.fields.split(',').join(' ');
 
-      query = query.select(fields);
-    } else {
-      query = query.select('-__v'); //default limitation-exclude
-    }
-    //4-PAGINATION
-    const page = req.query.page * 1 || 1;
-    const limit = req.query.limit * 1 || 100;
-    const skip = (page - 1) * limit;
+    //   query = query.select(fields);
+    // } else {
+    //   query = query.select('-__v'); //default limitation-exclude
+    // }
+    // //4-PAGINATION
+    // const page = req.query.page * 1 || 1;
+    // const limit = req.query.limit * 1 || 100;
+    // const skip = (page - 1) * limit;
 
-    query = query.skip(skip).limit(limit);
+    // query = query.skip(skip).limit(limit);
 
-    if (req.query.page) {
-      const numTours = await Tour.countDocuments();
-      if (skip >= numTours) throw new Error('This page does not exist');
-    }
+    // if (req.query.page) {
+    //   const numTours = await Tour.countDocuments();
+    //   if (skip >= numTours) throw new Error('This page does not exist');
+    // }
 
     //EXECUTE QUERY
-    const tours = await query;
+    const features = new APIFeatures(Tour.find(), req.query)
+      .filter()
+      .sort()
+      .limitFields()
+      .paginate();
+    const tours = await features.query;
 
     //FILTER USING mongoose METHODS-chaining
     // const query = await Tour.find()
